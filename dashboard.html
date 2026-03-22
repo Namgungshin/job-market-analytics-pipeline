@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>데이터분석 채용시장 분석 | 인디스워크 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d2e;
+    --card: #222538;
+    --border: #2e3250;
+    --accent1: #6c63ff;
+    --accent2: #00d4aa;
+    --accent3: #ff6b6b;
+    --accent4: #ffd166;
+    --text: #e8eaf6;
+    --text-muted: #8891b4;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Segoe UI',sans-serif; line-height:1.6; }
+
+  /* Header */
+  header {
+    background: linear-gradient(135deg, #1a1d2e 0%, #12102a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 40px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .header-left h1 { font-size:1.6rem; font-weight:700; color:#fff; }
+  .header-left h1 span { color:var(--accent1); }
+  .header-left p { color:var(--text-muted); font-size:.85rem; margin-top:4px; }
+  .header-badge {
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    color:#fff; padding:6px 16px; border-radius:20px; font-size:.8rem; font-weight:600;
+  }
+
+  /* KPI Grid */
+  .kpi-grid {
+    display:grid; grid-template-columns:repeat(5,1fr); gap:16px;
+    padding:28px 40px 0;
+  }
+  .kpi-card {
+    background:var(--card); border:1px solid var(--border); border-radius:14px;
+    padding:20px 22px;
+    position:relative; overflow:hidden;
+  }
+  .kpi-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background: linear-gradient(90deg, var(--accent1), var(--accent2));
+  }
+  .kpi-value { font-size:2.2rem; font-weight:800; color:#fff; line-height:1; }
+  .kpi-label { font-size:.78rem; color:var(--text-muted); margin-top:6px; }
+  .kpi-sub { font-size:.72rem; color:var(--accent2); margin-top:4px; }
+
+  /* Charts layout */
+  .section { padding: 28px 40px 0; }
+  .section-title { font-size:1.1rem; font-weight:600; color:#fff; margin-bottom:20px;
+    display:flex; align-items:center; gap:10px; }
+  .section-title::before { content:''; display:inline-block; width:4px; height:20px;
+    background: linear-gradient(var(--accent1), var(--accent2)); border-radius:2px; }
+
+  .charts-2col { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .charts-3col { display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; }
+  .chart-card {
+    background:var(--card); border:1px solid var(--border); border-radius:14px; padding:24px;
+  }
+  .chart-card.wide { grid-column: span 2; }
+  .chart-title { font-size:.9rem; color:var(--text-muted); margin-bottom:16px; font-weight:500; }
+  .chart-wrap { position:relative; }
+
+  /* Skills bar chart */
+  .skill-bar-list { display:flex; flex-direction:column; gap:8px; }
+  .skill-row { display:flex; align-items:center; gap:10px; }
+  .skill-name { width:130px; font-size:.8rem; color:var(--text); text-align:right; flex-shrink:0; }
+  .skill-track { flex:1; height:22px; background:#2a2d45; border-radius:11px; overflow:hidden; position:relative; }
+  .skill-fill {
+    height:100%; border-radius:11px;
+    background: linear-gradient(90deg, var(--accent1), var(--accent2));
+    transition: width .8s ease;
+    display:flex; align-items:center; justify-content:flex-end; padding-right:8px;
+  }
+  .skill-fill span { font-size:.72rem; color:#fff; font-weight:600; }
+
+  /* Company table */
+  .co-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .co-row { display:flex; align-items:center; justify-content:space-between;
+    background:#1e2138; border-radius:8px; padding:8px 14px; gap:10px; }
+  .co-name { font-size:.82rem; color:var(--text); }
+  .co-count { font-size:.78rem; font-weight:700; color:var(--accent2);
+    background: rgba(0,212,170,.12); padding:2px 10px; border-radius:20px; }
+
+  /* Footer */
+  footer { padding:28px 40px 40px; text-align:center; color:var(--text-muted); font-size:.78rem; }
+  footer a { color:var(--accent1); text-decoration:none; }
+
+  /* insight badges */
+  .insight-row { display:flex; gap:12px; flex-wrap:wrap; margin-top:12px; }
+  .badge { padding:6px 14px; border-radius:20px; font-size:.78rem; font-weight:600; }
+  .badge-purple { background:rgba(108,99,255,.2); color:var(--accent1); border:1px solid rgba(108,99,255,.3); }
+  .badge-green { background:rgba(0,212,170,.15); color:var(--accent2); border:1px solid rgba(0,212,170,.25); }
+  .badge-red { background:rgba(255,107,107,.15); color:var(--accent3); border:1px solid rgba(255,107,107,.25); }
+  .badge-yellow { background:rgba(255,209,102,.15); color:var(--accent4); border:1px solid rgba(255,209,102,.25); }
+
+  @media(max-width:900px){
+    .kpi-grid{grid-template-columns:repeat(2,1fr);}
+    .charts-2col,.charts-3col{grid-template-columns:1fr;}
+    .chart-card.wide{grid-column:span 1;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>📊 한국 <span>데이터분석</span> 채용시장 분석</h1>
+    <p>인디스워크(IN THIS WORK) 전수 크롤링 · 2026년 3월 기준 · 317개 공고</p>
+  </div>
+  <div class="header-badge">🔬 포트폴리오 프로젝트</div>
+</header>
+
+<!-- KPI -->
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div class="kpi-value">317</div>
+    <div class="kpi-label">수집 채용공고 총 건수</div>
+    <div class="kpi-sub">인디스워크 데이터분석 카테고리 전수</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value">2.9<span style="font-size:1.2rem">개</span></div>
+    <div class="kpi-label">공고당 평균 요구 스킬 수</div>
+    <div class="kpi-sub">Python·SQL·통계 트리오가 핵심</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value">79.5<span style="font-size:1.2rem">%</span></div>
+    <div class="kpi-label">서울 소재 기업 비중</div>
+    <div class="kpi-sub">252 / 317개 공고</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value">87.7<span style="font-size:1.2rem">%</span></div>
+    <div class="kpi-label">스타트업 + 대기업 비중</div>
+    <div class="kpi-sub">스타트업 278개 / 대기업 31개</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value">37.6<span style="font-size:1.2rem">%</span></div>
+    <div class="kpi-label">신입·인턴 공고 비중</div>
+    <div class="kpi-sub">신입 58건 + 인턴 39건</div>
+  </div>
+</div>
+
+<!-- 핵심 인사이트 -->
+<div class="section">
+  <div class="insight-row">
+    <span class="badge badge-purple">🐍 Python이 1위 스킬 (119건, 37.5%)</span>
+    <span class="badge badge-green">🏢 스타트업 채용이 87.7%로 압도적</span>
+    <span class="badge badge-red">📍 서울 집중도 79.5%</span>
+    <span class="badge badge-yellow">🤖 DS/ML 직무가 분석가보다 2배 많아</span>
+  </div>
+</div>
+
+<!-- Row 1: 직무카테고리 + 고용형태 + 기업규모 -->
+<div class="section">
+  <div class="section-title">직무 구성 & 고용 현황</div>
+  <div class="charts-3col">
+    <div class="chart-card">
+      <div class="chart-title">직무 카테고리 분포</div>
+      <div class="chart-wrap"><canvas id="catChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">고용형태 분포</div>
+      <div class="chart-wrap"><canvas id="empChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">기업규모 분포</div>
+      <div class="chart-wrap"><canvas id="sizeChart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- Row 2: 스킬 Top 20 -->
+<div class="section">
+  <div class="section-title">요구 스킬 TOP 20 빈도 분석</div>
+  <div class="chart-card">
+    <div class="chart-title">317개 공고에서 언급된 기술 스택 빈도 (중복 포함)</div>
+    <div class="skill-bar-list" id="skillBars"></div>
+  </div>
+</div>
+
+<!-- Row 3: 지역 + 기업 -->
+<div class="section">
+  <div class="section-title">지역 분포 & TOP 채용 기업</div>
+  <div class="charts-2col">
+    <div class="chart-card">
+      <div class="chart-title">근무지역 분포</div>
+      <div class="chart-wrap"><canvas id="cityChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">TOP 15 채용 활성 기업</div>
+      <div class="co-grid" id="coGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Row 4: 스킬 그룹별 -->
+<div class="section" style="padding-bottom:40px;">
+  <div class="section-title">스킬 카테고리별 수요 분석</div>
+  <div class="charts-2col">
+    <div class="chart-card">
+      <div class="chart-title">프로그래밍 언어 비교</div>
+      <div class="chart-wrap"><canvas id="langChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">클라우드 & 데이터 인프라 스킬</div>
+      <div class="chart-wrap"><canvas id="cloudChart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>📂 데이터 출처: <a href="https://inthiswork.com/data" target="_blank">IN THIS WORK · 인디스워크</a> &nbsp;|&nbsp;
+     수집 기간: 2026년 3월 &nbsp;|&nbsp; 총 317개 공고 전수 분석</p>
+  <p style="margin-top:6px">본 프로젝트는 포트폴리오 목적으로 제작되었습니다. Python · BeautifulSoup · JavaScript · Chart.js</p>
+</footer>
+
+<script>
+const COLORS = {
+  purple: '#6c63ff', cyan: '#00d4aa', red: '#ff6b6b', yellow: '#ffd166',
+  blue: '#4ecdc4', orange: '#ff9f43', pink: '#fd79a8', green: '#55efc4'
+};
+const palette = Object.values(COLORS);
+
+Chart.defaults.color = '#8891b4';
+Chart.defaults.borderColor = '#2e3250';
+Chart.defaults.font.family = "'Segoe UI', sans-serif";
+
+// ── 직무 카테고리 (Donut) ──────────────────────────────────
+new Chart(document.getElementById('catChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['데이터사이언티스트','기타','데이터분석가','DE/ML엔지니어','리서치/인턴','기획/전략'],
+    datasets:[{data:[91,86,46,43,30,21], backgroundColor: palette, borderWidth:0, hoverOffset:8}]
+  },
+  options:{
+    plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:12,font:{size:11}}}},
+    cutout:'62%'
+  }
+});
+
+// ── 고용형태 (Donut) ───────────────────────────────────────
+new Chart(document.getElementById('empChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['기타(미표기)','신입','인턴','경력','계약직','정규직'],
+    datasets:[{data:[183,58,39,25,8,4], backgroundColor: palette.slice(2), borderWidth:0, hoverOffset:8}]
+  },
+  options:{
+    plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:12,font:{size:11}}}},
+    cutout:'62%'
+  }
+});
+
+// ── 기업규모 (Donut) ───────────────────────────────────────
+new Chart(document.getElementById('sizeChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['스타트업','대기업','중견기업','외국계'],
+    datasets:[{data:[278,31,5,3], backgroundColor:[COLORS.purple,COLORS.cyan,COLORS.yellow,COLORS.orange], borderWidth:0, hoverOffset:8}]
+  },
+  options:{
+    plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:12,font:{size:11}}}},
+    cutout:'62%'
+  }
+});
+
+// ── 스킬 바 차트 ────────────────────────────────────────────
+const skills = [
+  ['Python',119],['데이터 분석',108],['SQL',100],['통계',51],['머신러닝',49],
+  ['딥러닝',47],['R',47],['데이터 파이프라인',44],['PyTorch',42],['시각화',35],
+  ['Excel',32],['AWS',29],['Tableau',28],['Airflow',28],['GCP',20],
+  ['Spark',20],['TensorFlow',15],['BigQuery',13],['Azure',12],['ETL',12]
+];
+const maxSkill = skills[0][1];
+const skillContainer = document.getElementById('skillBars');
+skills.forEach(([name, cnt], i) => {
+  const pct = (cnt/maxSkill*100).toFixed(1);
+  const hue = 260 - (i * 6);
+  skillContainer.innerHTML += `
+    <div class="skill-row">
+      <div class="skill-name">${name}</div>
+      <div class="skill-track">
+        <div class="skill-fill" style="width:${pct}%;background:linear-gradient(90deg,hsl(${hue},70%,65%),hsl(${hue-30},80%,60%))">
+          <span>${cnt}</span>
+        </div>
+      </div>
+    </div>`;
+});
+
+// ── 지역 (Bar) ─────────────────────────────────────────────
+new Chart(document.getElementById('cityChart'), {
+  type: 'bar',
+  data: {
+    labels: ['서울','기타','경기','대전','인천','부산'],
+    datasets:[{
+      data:[252,41,23,1,0,0],
+      backgroundColor: [COLORS.purple,COLORS.cyan,COLORS.blue,COLORS.yellow,COLORS.red,COLORS.orange],
+      borderRadius:6, borderSkipped:false
+    }]
+  },
+  options:{
+    indexAxis:'y',
+    plugins:{legend:{display:false}},
+    scales:{ x:{grid:{color:'#2e3250'}}, y:{grid:{display:false}} }
+  }
+});
+
+// ── TOP 기업 그리드 ─────────────────────────────────────────
+const companies = [
+  ['업스테이지',12],['LG AI연구원',8],['우아한형제들',8],['토스뱅크',6],
+  ['카카오',5],['42dot',5],['넥슨코리아',5],['한국산업은행',4],
+  ['토스증권',4],['마키나락스',4],['라이너',4],['카카오페이',3],
+  ['디노티시아',3],['PTKOREA',3],['신용보증기금',3]
+];
+const coGrid = document.getElementById('coGrid');
+companies.forEach(([name, cnt]) => {
+  coGrid.innerHTML += `
+    <div class="co-row">
+      <span class="co-name">${name}</span>
+      <span class="co-count">${cnt}건</span>
+    </div>`;
+});
+
+// ── 언어 비교 (Bar) ─────────────────────────────────────────
+new Chart(document.getElementById('langChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Python','SQL','R','TensorFlow','PyTorch'],
+    datasets:[{
+      label:'공고 수',
+      data:[119,100,47,15,42],
+      backgroundColor:[COLORS.purple,COLORS.cyan,COLORS.red,COLORS.orange,COLORS.yellow],
+      borderRadius:8, borderSkipped:false
+    }]
+  },
+  options:{
+    plugins:{legend:{display:false}},
+    scales:{
+      y:{grid:{color:'#2e3250'}, ticks:{stepSize:20}},
+      x:{grid:{display:false}}
+    }
+  }
+});
+
+// ── 클라우드/인프라 스킬 ────────────────────────────────────
+new Chart(document.getElementById('cloudChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Airflow','AWS','데이터 파이프라인','Spark','GCP','BigQuery','Azure','ETL'],
+    datasets:[{
+      label:'공고 수',
+      data:[28,29,44,20,20,13,12,12],
+      backgroundColor: [COLORS.cyan,COLORS.orange,COLORS.purple,COLORS.green,COLORS.blue,COLORS.yellow,COLORS.pink,COLORS.red],
+      borderRadius:8, borderSkipped:false
+    }]
+  },
+  options:{
+    indexAxis:'y',
+    plugins:{legend:{display:false}},
+    scales:{
+      x:{grid:{color:'#2e3250'}},
+      y:{grid:{display:false}}
+    }
+  }
+});
+</script>
+</body>
+</html>
