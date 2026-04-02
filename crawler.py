@@ -16,6 +16,7 @@ import re
 import time
 import csv
 import logging
+import random
 from dataclasses import dataclass, fields, asdict
 from typing import Optional
 from urllib.parse import urljoin
@@ -28,12 +29,13 @@ from bs4 import BeautifulSoup
 # ──────────────────────────────────────────────────────────
 BASE_URL   = "https://inthiswork.com"
 LIST_URL   = "https://inthiswork.com/data"          # 데이터분석 카테고리
-TOTAL_PAGES = 13                                    # 전체 페이지 수 (변경 시 수정)
+TOTAL_PAGES = 1                                     # 전체 페이지 수 (변경 시 수정)
 OUTPUT_CSV = "inthiswork_data_jobs.csv"
-DELAY_SEC  = 3.0    # 요청 간 딜레이 (429 방지용으로 늘림)
+DELAY_MIN  = 2.0    # 요청 간 최소 딜레이 (초)
+DELAY_MAX  = 4.0    # 요청 간 최대 딜레이 (초) — 랜덤 지터
 TIMEOUT    = 15     # 요청 타임아웃(초)
-RETRY_MAX  = 3      # 429 발생 시 재시도 횟수
-RETRY_WAIT = 10     # 재시도 전 대기(초)
+RETRY_MAX  = 2      # 429 발생 시 재시도 횟수
+RETRY_BASE = 20     # 지수 백오프 기준 대기(초) — 20, 40초
 
 # 요구 스킬 키워드 사전 (매칭 순서 중요 — 긴 것 먼저)
 SKILL_KEYWORDS = [
@@ -91,7 +93,7 @@ def get_soup(url: str, session: requests.Session) -> Optional[BeautifulSoup]:
         try:
             resp = session.get(url, headers=HEADERS, timeout=TIMEOUT)
             if resp.status_code == 429:
-                wait = RETRY_WAIT * attempt
+                wait = RETRY_BASE * (2 ** (attempt - 1))
                 log.warning("429 Too Many Requests — %d초 대기 후 재시도 (%d/%d)", wait, attempt, RETRY_MAX)
                 time.sleep(wait)
                 continue
@@ -101,7 +103,7 @@ def get_soup(url: str, session: requests.Session) -> Optional[BeautifulSoup]:
         except requests.RequestException as e:
             log.warning("요청 실패: %s → %s", url, e)
             if attempt < RETRY_MAX:
-                time.sleep(RETRY_WAIT)
+                time.sleep(RETRY_BASE)
     return None
 
 
@@ -220,7 +222,7 @@ def collect_job_urls(session: requests.Session) -> list[dict]:
             })
             seen_urls.add(full_url)
 
-        time.sleep(DELAY_SEC)
+        time.sleep(random.uniform(DELAY_MIN, DELAY_MAX))
 
     log.info("총 %d개 공고 URL 수집 완료", len(all_jobs))
     return all_jobs
@@ -308,7 +310,7 @@ def crawl_details(job_list: list[dict], session: requests.Session) -> list[JobPo
                 position=job["position"],
                 url=job["url"],
             ))
-        time.sleep(DELAY_SEC)
+        time.sleep(random.uniform(DELAY_MIN, DELAY_MAX))
 
     log.info("상세 수집 완료: %d건", len(results))
     return results
