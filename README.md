@@ -14,6 +14,10 @@
 |:---:|:---:|
 | ![직무·고용형태 분포](chart_structure.png) | ![지역·기업규모 분포](chart_geo_company.png) |
 
+| 피처 중요도 (고용형태 예측 모델) | Confusion Matrix (LOOCV) |
+|:---:|:---:|
+| ![피처 중요도](chart_model_feature_importance.png) | ![Confusion Matrix](chart_model_confusion_matrix.png) |
+
 ---
 
 ## 📌 프로젝트 개요
@@ -23,7 +27,7 @@
 | 수집 출처 | [inthiswork.com](https://inthiswork.com/data) — 데이터분석 카테고리 |
 | 수집 기간 | 2026년 3월 22일 |
 | 수집 공고 수 | **317건** (13페이지 전수) |
-| 분석 도구 | Python · SQL · Jupyter · MySQL · reportlab · Chart.js |
+| 분석 도구 | Python · SQL · Jupyter · MySQL · scikit-learn · LightGBM · reportlab · Chart.js |
 
 ---
 
@@ -53,6 +57,8 @@ job-market-analytics-pipeline/
 ├── chart_skill_groups.png   # 스킬 그룹별 분포 차트
 ├── chart_structure.png      # 직무·고용형태 분포 차트
 ├── chart_geo_company.png    # 지역·기업규모 분포 차트
+├── chart_model_feature_importance.png  # 고용형태 예측 모델 피처 중요도 차트
+├── chart_model_confusion_matrix.png    # 고용형태 예측 모델 Confusion Matrix
 ├── .env.example             # 환경 변수 예시 (DB 연결 정보)
 └── README.md
 ```
@@ -160,6 +166,24 @@ mysql -u root -p < schema.sql
 3. **PyTorch** — ML 생태계 주류 (TensorFlow보다 우선)
 4. **Airflow + 클라우드** — DE 방향 핵심 스택
 5. **스타트업 타겟** — 채용 87.7%가 스타트업
+
+---
+
+## 🤖 9. 고용형태 예측 모델 (ML Classification)
+
+채용공고의 **스킬·직무·기업규모·지역** 정보를 피처로 활용해 고용형태(비경력직 / 경력·계약직)를 예측하는 이진 분류 모델을 구축했습니다.
+
+| 항목 | 내용 |
+|------|------|
+| 유효 샘플 | 29건 (고용형태 미표기 16건 제외) |
+| 클래스 | 비경력직(신입+인턴) 22건 vs 경력·계약직 7건 |
+| 평가 방식 | LOOCV (소표본 환경 최적) |
+| Baseline (LR) F1-macro | 0.759 |
+| **Main (Random Forest) F1-macro** | **0.828** |
+
+**핵심 발견**: 기업 규모와 직무 카테고리가 고용형태 예측에 가장 중요한 피처로, 대기업일수록 신입·인턴 채용 비중이 높게 나타났습니다.
+
+> ⚠️ 소표본(29건) 한계로 정확도보다 피처 해석에 집중했으며, 실 서비스 적용 시 300건 이상의 레이블 데이터 확보가 선행되어야 합니다.
 
 ---
 
