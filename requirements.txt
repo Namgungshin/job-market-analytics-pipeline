@@ -1,0 +1,32 @@
+# ============================================================
+# job-market-analytics-pipeline 의존 패키지
+# 설치: pip install -r requirements.txt
+# Python 3.9+
+# ============================================================
+
+# 크롤링 (crawler.py)
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.0          # BS4 파서 옵션
+
+# 데이터 처리 (analysis.ipynb)
+pandas>=2.0.0
+numpy>=1.24.0
+
+# 시각화 (analysis.ipynb)
+matplotlib>=3.7.0
+seaborn>=0.12.0
+koreanize-matplotlib>=0.1.2
+
+# DB 연결 (analysis.ipynb 섹션 8)
+sqlalchemy>=2.0.0
+pymysql>=1.1.0
+cryptography>=41.0.0  # pymysql SSL 지원
+
+# PDF 리포트 (report.py / reportlab 기반)
+reportlab>=4.0.0
+
+# Jupyter 실행 환경
+jupyter>=1.0.0
+notebook>=7.0.0
+ipykernel>=6.25.0

@@ -15,12 +15,12 @@
 CREATE OR REPLACE VIEW mart_skill_demand AS
 SELECT
     js.skill_name,
-    COUNT(DISTINCT js.job_id)                                     AS posting_count,
+    COUNT(DISTINCT js.posting_id)                                  AS posting_count,
     ROUND(
-        COUNT(DISTINCT js.job_id) * 100.0
+        COUNT(DISTINCT js.posting_id) * 100.0
         / (SELECT COUNT(*) FROM job_posting),
     1)                                                            AS demand_rate_pct,
-    RANK() OVER (ORDER BY COUNT(DISTINCT js.job_id) DESC)        AS skill_rank
+    RANK() OVER (ORDER BY COUNT(DISTINCT js.posting_id) DESC)    AS skill_rank
 FROM job_skill js
 GROUP BY js.skill_name
 ORDER BY posting_count DESC;
@@ -68,7 +68,7 @@ SELECT
         ORDER BY COUNT(*) DESC
     )                                                             AS rank_within_category
 FROM job_posting jp
-JOIN job_skill js ON jp.id = js.job_id
+JOIN job_skill js ON jp.id = js.posting_id
 GROUP BY jp.position_category, js.skill_name
 ORDER BY jp.position_category, posting_count DESC;
 
